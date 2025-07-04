@@ -1,22 +1,58 @@
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+const waitFor = (time) => new Promise(resolve => setTimeout(resolve, time));
+
+puppeteer.use(StealthPlugin());
 
 async function run() {
   const browser = await puppeteer.launch({
-    headless: false,
-    args: ['--start-maximized'],
+    headless: 'new',
+    args: ['--start-maximized' , '--no-sandbox', '--disable-setuid-sandbox'],
     defaultViewport: null
   });
+  console.log('browser opened');
 
   const page = await browser.newPage();
-  await page.goto("https://oddspedia.com/hot-bets", { timeout: 0 });
+  await page.goto("https://oddspedia.com/hot-bets", { timeout: 0 } );
+  console.log("page found");
 
+  
+  
   await page.waitForFunction(
-    () => document.querySelectorAll('.hot-bets-stats-table-row').length > 0,
-    { timeout: 60000 }
-  );
-//   await page.waitForTimeout(2000);
+      () => document.querySelectorAll('.hot-bets-stats-table-row').length > 0,
+      { timeout: 0 }
+    );
+    
+    await page.waitForSelector('.league-betting-stats-table-heading')
+    
+    await page.screenshot({ path: 'debug.png', fullPage: true });
+  console.log("selector found");
+
+//   arranging in order
+let first_odd = "";
+while (first_odd !== "100%") {
+  first_odd = await page.evaluate(() => {
+    const el = document.querySelector(".league-betting-stats-table-column-percentage__value");
+    return el ? el.innerText.trim() : "";
+  });
+
+  if (first_odd !== "100%") {
+    console.log("Not 100% yet, waiting...");
+    await page.evaluate(() => {
+        //clciking button to ararnge 
+        const sort = document.querySelectorAll('.league-betting-stats-table-heading')[1].click()
+    })
+    await waitFor(5000);
+  }
+}
+console.log("arranged");
 
   const results = await page.evaluate(() => {
+
+
+    // logic
     const matches = [];
     const rows = document.querySelectorAll('.hot-bets-stats-table-row');
 
@@ -52,7 +88,7 @@ async function run() {
     console.log("No 100% matches found.");
   }
 
-  // await browser.close();
+  await browser.close();
 }
 
 run();

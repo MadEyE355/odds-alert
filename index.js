@@ -1,12 +1,19 @@
-import puppeteer from "puppeteer";
-import dotenv from 'dotenv';
-import fetch from 'node-fetch';
+// import puppeteer from "puppeteer";
 
-dotenv.config();
+// import dotenv from 'dotenv';
+import fetch from 'node-fetch';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+puppeteer.use(StealthPlugin());
+
+const waitFor = (time) => new Promise(resolve => setTimeout(resolve, time));
+
+// dotenv.config();
 
 async function sendTelegramMessage(text) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const token = '7949811771:AAEG7eywRMob_bFr1WsgsGKqYa8-oCToWjs';
+  const chatId = '-1002556767038';
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
   await fetch(url, {
@@ -33,6 +40,26 @@ async function run() {
     () => document.querySelectorAll('.hot-bets-stats-table-row').length > 0,
     { timeout: 60000 }
   );
+
+  
+//   arranging in order
+let first_odd = "";
+while (first_odd !== "100%") {
+  first_odd = await page.evaluate(() => {
+    const el = document.querySelector(".league-betting-stats-table-column-percentage__value");
+    return el ? el.innerText.trim() : "";
+  });
+
+  if (first_odd !== "100%") {
+    // console.log("Not 100% yet, waiting...");
+    await page.evaluate(() => {
+        //clciking button to ararnge 
+        const sort = document.querySelectorAll('.league-betting-stats-table-heading')[1].click()
+    })
+    await waitFor(5000);
+  }
+}
+// console.log("arranged");
 
   const results = await page.evaluate(() => {
     const matches = [];
