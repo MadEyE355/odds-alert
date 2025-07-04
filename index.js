@@ -87,7 +87,7 @@ while (first_odd !== "100%") {
   if (results.length > 0) {
     let message = '✅ Bets:\n\n';
     results.forEach((item, i) => {
-      message += `${i + 1}. ${item.match}\n${item.team1} \n ${item.team2}\n ${item.label}\n\n`;
+      message += `${i + 1}. ${item.match}\nteam1: ${item.team1} \n team2: ${item.team2}\n ${item.label}\n\n`;
     });
 
     await sendTelegramMessage(message);
